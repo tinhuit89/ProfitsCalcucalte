@@ -1,23 +1,56 @@
 package vct.profitscalculate.models
 
 
+import android.util.Log
+import io.realm.RealmObject
+import io.realm.annotations.PrimaryKey
 import vct.profitscalculate.common.Utilities
-import java.io.Serializable
+import vct.profitscalculate.interfaces.MonthProfitInterface
+import io.realm.RealmList
+import vct.profitscalculate.AppController
+import vct.profitscalculate.common.Constants
 
+open class MonthProfitModel(
+        @PrimaryKey var id: Long = Utilities.getTimestamp(),
 
-data class MonthProfitModel(var name: String) : Serializable {
-    var id = Utilities.getTimestamp()
+        open var name: String = "",
 
-    var percentFromAffiliate: Double = 0.0
+        open var percentFromAffiliate: Double = 0.0,
 
-    var listUser: ArrayList<UserModel> = arrayListOf()
+        open var listUser: RealmList<UserModel> = RealmList(),
 
-    var totalProfitOfMonth: Double = 0.0 // tổng lợi nhuận các sàn
+        open var isQuater: Boolean = false,
 
-    var percentHold: Double = 0.0
+        open var totalProfitOfMonth: Double = 0.0, // tổng lợi nhuận các sàn
+
+        open var textReport: String = "",
+
+        open var holdersDiscountDefault: Double = 15.0,
+
+        open var keepFineProfit: Double = 0.0
+
+) : RealmObject() {
+
 
     init {
+        this.id = MonthProfitInterface.getMaxId(AppController.realmInstance())
+    }
 
+    open fun copy(
+            id: Long = this.id,
+            name: String = this.name,
+            percentFromAffiliate: Double = this.percentFromAffiliate,
+            listUser: RealmList<UserModel> = this.listUser,
+            isQuater: Boolean = this.isQuater,
+            totalProfitOfMonth: Double = this.totalProfitOfMonth,
+            textReport: String = this.textReport,
+            holdersDiscountDefault: Double = this.holdersDiscountDefault,
+            keepFineProfit: Double = this.keepFineProfit
+
+    ) = MonthProfitModel(id, name, percentFromAffiliate, listUser, isQuater, totalProfitOfMonth, textReport, holdersDiscountDefault, keepFineProfit)
+
+    companion object {
+        const val finePaidCount: Double = 80000.0
     }
 
 
@@ -29,62 +62,106 @@ data class MonthProfitModel(var name: String) : Serializable {
         return totalHold
     }
 
+    fun executeCalculateProfit() {
 
-    fun calculateProfitAffiliate(): ArrayList<UserModel> {
-        var listAffiliates: ArrayList<UserModel> = arrayListOf()
-
+        //Calculate profit for User
         for (userModel in listUser) {
+            val profitShareAffiliates = (userModel.getDiscountForAff() / 100) * totalProfitOfMonth
 
-            var profitAllAffiliates = userModel.discountValue * totalProfitOfMonth / 100
+            val profitNormalAffiliates = (percentFromAffiliate / 100) * profitShareAffiliates
 
-            var totalDolarAffiliates = percentFromAffiliate * profitAllAffiliates / 100
-
-            var totalDolarAffiliatesRelayer = (100 - percentFromAffiliate) * profitAllAffiliates / 100
+            val profitExchangeAffiliates = ((100 - percentFromAffiliate) / 100) * profitShareAffiliates
 
             if (userModel.type == UserModel.UserModel.TYPE_AFFILIATE) {
-                userModel.profitOfAffiliate = userModel.percentTakeMonth * totalDolarAffiliates / 100
-                listAffiliates.add(userModel)
+                userModel.profitOfAffiliate = userModel.percentTakeMonth * profitNormalAffiliates / 100
             } else if (userModel.type == UserModel.UserModel.TYPE_RELAYER) {
-                userModel.profitOfAffiliate = userModel.percentTakeMonth * totalDolarAffiliatesRelayer / 100
-                listAffiliates.add(userModel)
+                userModel.profitOfAffiliate = userModel.percentTakeMonth * profitExchangeAffiliates / 100
+                var profitShareRelayers = (userModel.discountValue / 100) * (totalProfitOfMonth)
+                userModel.profitOfRelayer = (userModel.percentTakeMonth * profitShareRelayers / 100) + userModel.profitOfAffiliate
             }
-        }
-        return listAffiliates
-    }
 
-    fun calculateProfitRelayer(): ArrayList<UserModel> {
-        var listRelayers: ArrayList<UserModel> = arrayListOf()
-        for (userModel in listUser) {
 
-            var profitAllRelayer = userModel.discountValue * totalProfitOfMonth / 100
+            if (userModel.isViolate) {
+                if (userModel.type == UserModel.UserModel.TYPE_AFFILIATE) {
+                    if (this.id - userModel.blockAtMonthId == 2L) {
+                        userModel.isViolate = false
+                        userModel.blockAtMonthId = -1
+                    } else {
+                        userModel.blockAtMonthId = this.id
+                        keepFineProfit += userModel.profitOfAffiliate
+                        userModel.profitOfAffiliate = 0.0
+                    }
+                } else if (userModel.type == UserModel.UserModel.TYPE_RELAYER) {
 
-            if (userModel.type == UserModel.UserModel.TYPE_RELAYER) {
-                userModel.profitOfAffiliate = userModel.percentTakeMonth * profitAllRelayer / 100
-                listRelayers.add(userModel)
-            }
-        }
+                    if (userModel.profitOfRelayer <= MonthProfitModel.finePaidCount - userModel.finesPaid) {
+                        keepFineProfit += userModel.profitOfRelayer
+                        userModel.profitOfRelayer = 0.0
+                    } else {
+                        keepFineProfit += MonthProfitModel.finePaidCount - userModel.finesPaid
+                        userModel.profitOfRelayer = userModel.profitOfRelayer - (MonthProfitModel.finePaidCount - userModel.finesPaid)
+                    }
 
-        return listRelayers
-    }
+                    if (userModel.finesPaid == MonthProfitModel.finePaidCount) {
+                        userModel.isViolate = false
+                        userModel.blockAtMonthId = -1
+                        userModel.finesPaid = 0.0
+                    }
 
-    companion object {
-
-        var coinCapoDiscoint: Double = 35.0
-        var relayersDiscoint: Double = 35.0
-        var affiliatesDiscoint: Double = 15.0
-        var holdersDiscoint: Double = 15.0
-
-        fun calculateProfitHolder(month1: MonthProfitModel, month2: MonthProfitModel, month3: MonthProfitModel): ArrayList<UserModel> {
-            var listHolder: ArrayList<UserModel> = arrayListOf()
-
-            for (userModel in month1.listUser) {
-                var totalProfitQuarter = (month1.totalProfitOfMonth + month2.totalProfitOfMonth + month3.totalProfitOfMonth) * holdersDiscoint / 100
-                if (userModel.type == UserModel.UserModel.TYPE_RELAYER || userModel.type == UserModel.UserModel.TYPE_HOLDER) {
-                    userModel.profitOfHolder = userModel.percentHold * totalProfitQuarter / 100
-                    listHolder.add(userModel)
+                    userModel.blockAtMonthId = this.id
+                    keepFineProfit += userModel.profitOfAffiliate
                 }
             }
-            return listHolder
         }
+
+        for (userModel in listUser) {
+            if (userModel.name == "capodex.com" || userModel.id == 0L) {
+                userModel.profitOfKeepFine = keepFineProfit
+                break
+            }
+        }
+
+        if (isQuater) {
+            var monthOneDb = AppController.realmInstance().where(MonthProfitModel::class.java).equalTo("id", this.id - 1).findFirst()
+            var monthTwoDb = AppController.realmInstance().where(MonthProfitModel::class.java).equalTo("id", this.id - 2).findFirst()
+
+            if (monthOneDb != null && monthTwoDb != null) {
+                var monthOne = monthOneDb.copy()
+                var monthTwo = monthTwoDb.copy()
+
+                var totalProfitQuarter = (monthOne.totalProfitOfMonth + monthTwo.totalProfitOfMonth + this.totalProfitOfMonth) * holdersDiscountDefault / 100
+                for (userModel in this.listUser) {
+                    if (userModel.type == UserModel.UserModel.TYPE_RELAYER || userModel.type == UserModel.UserModel.TYPE_HOLDER) {
+                        userModel.profitOfHolder = userModel.getPercentHold(AppController.realmInstance()) * totalProfitQuarter / 100
+                    }
+                }
+            }
+        }
+
+        textReport = ""
+        textReport += "\n--> Lợi nhuận của Relayer: \n"
+        for (userModel in listUser) {
+            if (userModel.type == UserModel.UserModel.TYPE_RELAYER) {
+                textReport += "${userModel.name} : ${Utilities.getDecimalCurrency(userModel.profitOfRelayer)} + ${Utilities.getDecimalCurrency(userModel.profitOfKeepFine)} = ${Utilities.getDecimalCurrency(userModel.getTotalProfitRelayer())}$\n"
+            }
+        }
+
+        textReport += "--> Lợi nhuận của Affiliate: \n"
+
+        for (userModel in listUser) {
+            if (userModel.type == UserModel.UserModel.TYPE_AFFILIATE) {
+                textReport += userModel.name + ": " + Utilities.getDecimalCurrency(userModel.profitOfAffiliate) + "$\n"
+            }
+        }
+
+        if (isQuater) {
+            for (userModel in listUser) {
+                if (userModel.type == UserModel.UserModel.TYPE_RELAYER || userModel.type == UserModel.UserModel.TYPE_HOLDER) {
+                    textReport += userModel.name + ": " + Utilities.getDecimalCurrency(userModel.profitOfHolder) + "$\n"
+                }
+            }
+        }
+
+        Log.d(Constants.TAG, textReport)
     }
+
 }

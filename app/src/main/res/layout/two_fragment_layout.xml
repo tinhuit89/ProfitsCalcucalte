@@ -10,14 +10,15 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="5dp"
-        android:text="Nhập đầy đủ thông tin để tính lơi nhuận: " />
+        android:text="Nhập đầy đủ thông tin để tính lơi nhuận: "
+        android:textStyle="bold" />
 
     <LinearLayout
-        android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:visibility="gone">
 
         <LinearLayout
             android:layout_width="0dp"
@@ -69,11 +70,11 @@
     </LinearLayout>
 
     <LinearLayout
-        android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:visibility="gone">
 
         <LinearLayout
             android:layout_width="0dp"
@@ -143,14 +144,30 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="5dp"
-                    android:text="Doanh thu từ Relayer: "
-                    android:textSize="16dp"
-                    android:textStyle="bold" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="5dp"
+                        android:text="Doanh thu từ Relayer: "
+                        android:textSize="16dp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_margin="5dp"
+                        android:text="Gian lận"
+                        android:textSize="16dp"
+                        android:textStyle="bold" />
+
+
+                </RelativeLayout>
+
 
                 <LinearLayout
                     android:id="@+id/lnRelayerProfit"
@@ -180,21 +197,19 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
-                        android:hint="tỉ lệ %"
-                        android:text=""
+                        android:hint="tỉ lệ"
                         android:inputType="numberDecimal"
-                        android:textSize="16dp"
-                        android:textStyle="bold" />
+                        android:text=""
+                        android:textSize="16dp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="/ tổng doanh thu"
+                        android:text="(%) / tổng doanh thu"
                         android:textSize="16dp"
                         android:textStyle="bold" />
 
                 </LinearLayout>
-
 
                 <LinearLayout
                     android:id="@+id/lnAffiliateProfit"
@@ -207,22 +222,34 @@
 
                 <LinearLayout
                     android:id="@+id/lnHolderProfit"
-                    android:visibility="gone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:visibility="gone">
 
 
                 </LinearLayout>
 
             </LinearLayout>
 
+            <EditText
+                android:id="@+id/edMonthName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center"
+                android:hint="Nhập tên tháng"
+                android:inputType="numberDecimal"
+                android:text=""
+                android:textSize="16dp"
+                android:textStyle="bold" />
+
             <Button
                 android:id="@+id/btnAddMonth"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:text="Tổng kết tháng"
+                android:text="Tạo doanh thu theo tháng"
                 android:textAllCaps="false" />
 
 
@@ -236,9 +263,9 @@
 
             <TextView
                 android:id="@+id/tvResult"
-                android:padding="10dp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:padding="10dp" />
 
 
         </LinearLayout>

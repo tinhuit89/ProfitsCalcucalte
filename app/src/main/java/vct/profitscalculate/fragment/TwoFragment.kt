@@ -2,12 +2,13 @@ package vct.profitscalculate.fragment
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import vct.profitscalculate.R
-import vct.profitscalculate.activity.MainTabActivty
+import vct.profitscalculate.activity.MainTabActivity
 import vct.profitscalculate.common.Constants
 import vct.profitscalculate.controller.ItemUserForMonth
 import vct.profitscalculate.interfaces.DataCallback
@@ -15,14 +16,17 @@ import vct.profitscalculate.models.UserModel
 import android.widget.LinearLayout
 import android.widget.EditText
 import android.widget.TextView
+import io.realm.Realm
+import vct.profitscalculate.AppController
 import vct.profitscalculate.common.Utilities
+import vct.profitscalculate.interfaces.MonthProfitInterface
 import vct.profitscalculate.models.MonthProfitModel
 
 
 class TwoFragment : Fragment(), View.OnClickListener {
 
 
-    private lateinit var activity: MainTabActivty
+    private lateinit var activity: MainTabActivity
 
     private lateinit var edPercentCoincapo: EditText
     private lateinit var edPercentRelayers: EditText
@@ -37,19 +41,16 @@ class TwoFragment : Fragment(), View.OnClickListener {
     private lateinit var lnAddItem: LinearLayout
     private lateinit var tvResult: TextView
     private lateinit var lnHolderProfit: LinearLayout
+    private lateinit var edMonthName: EditText
 
     private var listUserForMonth: ArrayList<ItemUserForMonth> = ArrayList()
 
-    private var listMonthProfit: ArrayList<MonthProfitModel> = arrayListOf()
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
+    private val realmInstance = AppController.realmInstance()
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         var view = inflater!!.inflate(R.layout.two_fragment_layout, container, false)
-        activity = getActivity() as MainTabActivty
+        activity = getActivity() as MainTabActivity
         initView(view)
         initData()
         return view
@@ -69,11 +70,10 @@ class TwoFragment : Fragment(), View.OnClickListener {
         lnAddItem = view.findViewById(R.id.lnAddItem)
         tvResult = view.findViewById(R.id.tvResult)
         lnHolderProfit = view.findViewById(R.id.lnHolderProfit)
+        edMonthName = view.findViewById(R.id.edMonthName)
     }
 
     private fun initData() {
-
-//        Utilities.saveObJectToFile(ArrayList<MonthProfitModel>(), activity, Constants.LIST_REPORT_FILENAME)
 
         edPercentCoincapo.setText("35")
         edPercentRelayers.setText("35")
@@ -81,62 +81,21 @@ class TwoFragment : Fragment(), View.OnClickListener {
         edPercentHolders.setText("15")
         btnAddMonth.setOnClickListener(this)
 
-        listMonthProfit = Utilities.getListDataFromFile(activity, Constants.LIST_REPORT_FILENAME)
-
-        for (monthProfitModel in listMonthProfit) {
-            reportDataFormonth(monthProfitModel)
-        }
-
     }
 
     private fun setDataMonth() {
         listUserForMonth = ArrayList()
-        lnAffiliateProfit.removeAllViews()
-        lnRelayerProfit.removeAllViews()
+        lnAffiliateProfit.removeAllViewsInLayout()
+        lnRelayerProfit.removeAllViewsInLayout()
+        lnHolderProfit.removeAllViewsInLayout()
         edPercentFromAffiliates.setText("0")
         for (itemUserController in activity.listItemUserController) {
-            if (itemUserController.userModel.type == UserModel.UserModel.TYPE_RELAYER) {
-                listUserForMonth.add(ItemUserForMonth(activity, itemUserController.userModel, lnRelayerProfit, dataCallback))
-            } else if (itemUserController.userModel.type == UserModel.UserModel.TYPE_AFFILIATE) {
-                listUserForMonth.add(ItemUserForMonth(activity, itemUserController.userModel, lnAffiliateProfit, dataCallback))
-            } else if (itemUserController.userModel.type == UserModel.UserModel.TYPE_HOLDER) {
-                listUserForMonth.add(ItemUserForMonth(activity, itemUserController.userModel, lnHolderProfit, dataCallback))
+            when {
+                itemUserController.userModel.type == UserModel.UserModel.TYPE_RELAYER -> listUserForMonth.add(ItemUserForMonth(activity, itemUserController.userModel, lnRelayerProfit, dataCallback))
+                itemUserController.userModel.type == UserModel.UserModel.TYPE_AFFILIATE -> listUserForMonth.add(ItemUserForMonth(activity, itemUserController.userModel, lnAffiliateProfit, dataCallback))
+                itemUserController.userModel.type == UserModel.UserModel.TYPE_HOLDER -> listUserForMonth.add(ItemUserForMonth(activity, itemUserController.userModel, lnHolderProfit, dataCallback))
             }
         }
-    }
-
-    private fun reportDataFormonth(monthProfitModel: MonthProfitModel) {
-        var result = tvResult.text.toString()
-        result += "\n\n------" + "Dữ liệu " + monthProfitModel.name + "------\n"
-
-        result += "\n--> Lợi nhuận của Affiliate: \n"
-
-        for (userModel in monthProfitModel.calculateProfitAffiliate()) {
-            if (userModel.type == UserModel.UserModel.TYPE_AFFILIATE) {
-                result += userModel.name + ": " + Utilities.getDecimalCurrency(userModel.getTotalProfit()) + "$\n"
-            }
-        }
-
-        result += "\n--> Lợi nhuận của Relayer: \n"
-        for (userModel in monthProfitModel.calculateProfitRelayer()) {
-            if (userModel.type == UserModel.UserModel.TYPE_RELAYER) {
-                result += userModel.name + ": " + Utilities.getDecimalCurrency(userModel.getTotalProfit()) + "$\n"
-            }
-        }
-
-
-        var currMonth = Utilities.getNumberFromString(monthProfitModel.name).toInt()
-        if (currMonth % 3 == 0) {
-            result += "\n--> Lợi nhuận của Holder: \n"
-            for (userModel in MonthProfitModel.calculateProfitHolder(listMonthProfit[listMonthProfit.size - 1],
-                    listMonthProfit[listMonthProfit.size - 2], listMonthProfit[listMonthProfit.size - 3])) {
-                if (userModel.type == UserModel.UserModel.TYPE_RELAYER || userModel.type == UserModel.UserModel.TYPE_HOLDER) {
-                    result += userModel.name + ": " + Utilities.getDecimalCurrency(userModel.profitOfHolder) + "$\n"
-                }
-            }
-        }
-
-        tvResult.text = result
     }
 
     override fun onResume() {
@@ -177,29 +136,30 @@ class TwoFragment : Fragment(), View.OnClickListener {
                 }
             }
 
-            var nameMonth = ""
-            nameMonth = if (listMonthProfit.size > 0) {
-                var lastMonth = listMonthProfit[listMonthProfit.size - 1]
-                "Tháng " + (Utilities.getNumberFromString(lastMonth.name).toInt() + 1).toString()
-            } else {
-                "Tháng 1"
+            if (edMonthName.text.toString() == "") {
+                return Utilities.showToast(activity, "Vui lòng nhập tên tháng báo cáo")
             }
 
-            var monthProfitModel = MonthProfitModel(nameMonth)
+            Utilities.showHideKeyBoard(activity, false, edMonthName)
+
+            var nameMonth = "Tháng " + edMonthName.text.toString()
+
+            var monthProfitModel = MonthProfitModel(name = nameMonth)
+            monthProfitModel.isQuater = (monthProfitModel.id % 3 == 0L)
             monthProfitModel.percentFromAffiliate = edPercentFromAffiliates.text.toString().toDouble()
 
             var totalProfitOfMonth = 0.0
             for (itemUserForMonth in listUserForMonth) {
+                itemUserForMonth.userModel.discountValue = itemUserForMonth.discountValue
+
                 if (itemUserForMonth.userModel.type == UserModel.UserModel.TYPE_RELAYER) {
-                    itemUserForMonth.userModel.discountValue = itemUserForMonth.discountValue
-                    itemUserForMonth.userModel.profitTakeMonth = itemUserForMonth.dolarProfit
+                    itemUserForMonth.userModel.profitTakeMonth = itemUserForMonth.dolarProfit //* (100 - monthProfitModel.percentFromAffiliate)
                     totalProfitOfMonth += itemUserForMonth.dolarProfit
                 }
 
                 if (itemUserForMonth.userModel.type == UserModel.UserModel.TYPE_AFFILIATE) {
                     itemUserForMonth.userModel.percentTakeMonth = itemUserForMonth.percentProfit
                 }
-
 
             }
 
@@ -210,20 +170,42 @@ class TwoFragment : Fragment(), View.OnClickListener {
                 }
 
                 if (itemUserForMonth.userModel.type == UserModel.UserModel.TYPE_AFFILIATE) {
-                    itemUserForMonth.userModel.profitTakeMonth = itemUserForMonth.userModel.percentTakeMonth * totalProfitOfMonth / 100
+                    val amountWithTotal = monthProfitModel.percentFromAffiliate / 100 * totalProfitOfMonth
+                    itemUserForMonth.userModel.profitTakeMonth = itemUserForMonth.userModel.percentTakeMonth / 100 * amountWithTotal
                 }
 
+                if (itemUserForMonth.cbViolate.isChecked) {
+                    itemUserForMonth.userModel.isViolate = true
+                }
                 monthProfitModel.listUser.add(itemUserForMonth.userModel)
             }
 
+//            for (itemUserForMonth in listUserForMonth) {
+//
+//                if (itemUserForMonth.userModel.type == UserModel.UserModel.TYPE_RELAYER) {
+//                    itemUserForMonth.userModel.percentTakeMonth = itemUserForMonth.userModel.profitTakeMonth * (100 - monthProfitModel.percentFromAffiliate) / totalProfitOfMonth
+//                }
+//
+//                if (itemUserForMonth.userModel.type == UserModel.UserModel.TYPE_AFFILIATE) {
+//                    itemUserForMonth.userModel.profitTakeMonth = itemUserForMonth.userModel.percentTakeMonth * (monthProfitModel.percentFromAffiliate * totalProfitOfMonth / 100)
+//                }
+//
+//                if (itemUserForMonth.cbViolate.isChecked) {
+//                    itemUserForMonth.userModel.isViolate = true
+//                }
+//                monthProfitModel.listUser.add(itemUserForMonth.userModel)
+//            }
+
             monthProfitModel.totalProfitOfMonth = totalProfitOfMonth
 
+            monthProfitModel.executeCalculateProfit()
 
-            listMonthProfit.add(monthProfitModel)
+            var monthAdded = MonthProfitInterface.addMonth(realmInstance, monthProfitModel)
 
-            Utilities.saveObJectToFile(listMonthProfit, activity, Constants.LIST_REPORT_FILENAME)
-            reportDataFormonth(monthProfitModel)
-
+            if (monthAdded != null) {
+                Log.d(Constants.TAG, "Create with id: ${monthAdded.id}")
+                Utilities.showToast(activity, "Tạo doanh thu thành công")
+            }
         }
     }
 

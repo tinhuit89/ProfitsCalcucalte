@@ -5,6 +5,8 @@ object Constants {
 
     const val LIST_USER_FILENAME = "LIST_USER_FILENAME"
     const val LIST_REPORT_FILENAME = "LIST_REPORT_FILENAME"
+
+    const val VIEW_REPORT = "VIEW_REPORT"
     /*Define tag*/
-    const val TAG = "CAPO_SDK"
+    const val TAG = "tinhvc"
 }

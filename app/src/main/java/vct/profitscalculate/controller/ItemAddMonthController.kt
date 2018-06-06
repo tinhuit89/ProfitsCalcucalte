@@ -6,6 +6,8 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
+import io.realm.Realm
+import vct.profitscalculate.AppController
 import vct.profitscalculate.R
 import vct.profitscalculate.common.Constants
 import vct.profitscalculate.common.Utilities
@@ -48,7 +50,7 @@ class ItemAddMonthController(private val activity: Activity, var userModel: User
     fun setViewData() {
         edName.setText(userModel.name)
         edCapo.setText(Utilities.getDecimalCurrency(userModel.capoVolume))
-        tvPercent.text = "%.2f".format(userModel.percentHold) + " (%)"
+        tvPercent.text = "%.2f".format(userModel.getPercentHold(AppController.realmInstance())) + " (%)"
     }
 
     override fun onClick(v: View?) {

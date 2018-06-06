@@ -17,8 +17,8 @@
             android:layout_weight="3"
             android:background="@android:color/transparent"
             android:editable="false"
-            android:gravity="center"
-            android:focusable="false" />
+            android:focusable="false"
+            android:gravity="center" />
 
         <EditText
             android:id="@+id/edCapo"
@@ -37,6 +37,7 @@
             android:layout_weight="3"
             android:gravity="center" />
 
+
         <Button
             android:id="@+id/btnDel"
             android:layout_width="wrap_content"
@@ -45,7 +46,26 @@
             android:text="Xoá"
             android:textAllCaps="false" />
 
+        <Button
+            android:id="@+id/btnViewReport"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Xem báo cáo"
+            android:textAllCaps="false"
+            android:visibility="gone" />
+
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvReport"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:gravity="left"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:visibility="gone" />
 
     <View
         android:layout_width="match_parent"

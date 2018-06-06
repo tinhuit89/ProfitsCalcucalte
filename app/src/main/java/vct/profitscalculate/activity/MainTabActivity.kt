@@ -1,7 +1,14 @@
 package vct.profitscalculate.activity
 
+import android.Manifest
+import android.app.Activity
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.support.annotation.RequiresApi
 import android.support.design.widget.TabLayout
+import android.support.v4.app.ActivityCompat
+import android.support.v4.app.ActivityCompat.checkSelfPermission
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
@@ -11,22 +18,28 @@ import android.support.v7.widget.Toolbar
 import android.view.LayoutInflater
 import android.view.WindowManager
 import android.widget.TextView
+import io.realm.Realm
+import vct.profitscalculate.AppController
 import vct.profitscalculate.R
+import vct.profitscalculate.common.Utilities
 import vct.profitscalculate.controller.ItemAddUserController
 import vct.profitscalculate.fragment.OneFragment
+import vct.profitscalculate.fragment.ThreeFragment
 import vct.profitscalculate.fragment.TwoFragment
 import vct.profitscalculate.models.UserModel
-import java.util.ArrayList
+import java.util.*
 
 
-class MainTabActivty internal constructor() : AppCompatActivity() {
+@RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+class MainTabActivity internal constructor() : AppCompatActivity() {
 
     private var toolbar: Toolbar? = null
     private var tabLayout: TabLayout? = null
     private var viewPager: ViewPager? = null
 
-    public var listItemUserController: ArrayList<ItemAddUserController> = ArrayList()
-    public var listUsers: ArrayList<UserModel> = ArrayList()
+    var listItemUserController: ArrayList<ItemAddUserController> = ArrayList()
+    var listUsers: ArrayList<UserModel> = ArrayList()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,6 +72,27 @@ class MainTabActivty internal constructor() : AppCompatActivity() {
 
         })
         setupTabIcons()
+
+        checkStoragePermissions(this)
+    }
+
+    // Storage Permissions
+    private val requestExternalStorage = 1
+    private val permissionStorage = arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
+    private fun checkStoragePermissions(activity: Activity) {
+        // Check if we have write permission
+        val permission = checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                    activity,
+                    permissionStorage,
+                    requestExternalStorage
+            )
+        } else {
+            Utilities.backupDatabase(AppController.realmInstance())
+        }
     }
 
     /**
@@ -73,12 +107,19 @@ class MainTabActivty internal constructor() : AppCompatActivity() {
         val tabTwo = LayoutInflater.from(this).inflate(R.layout.custom_tab_layout, null) as TextView
         tabTwo.text = "Doanh Thu"
         tabLayout!!.getTabAt(1)!!.customView = tabTwo
+
+
+        val tabThree = LayoutInflater.from(this).inflate(R.layout.custom_tab_layout, null) as TextView
+        tabThree.text = "Báo cáo"
+        tabLayout!!.getTabAt(2)!!.customView = tabThree
     }
 
     private fun setupViewPager(viewPager: ViewPager) {
         val adapter = ViewPagerAdapter(supportFragmentManager)
         adapter.addFragment(OneFragment(), "Vốn")
         adapter.addFragment(TwoFragment(), "Doanh Thu")
+        adapter.addFragment(ThreeFragment(), "Báo cáo")
+        viewPager.offscreenPageLimit = 3
         viewPager.adapter = adapter
         viewPager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
             override fun onPageScrollStateChanged(state: Int) {

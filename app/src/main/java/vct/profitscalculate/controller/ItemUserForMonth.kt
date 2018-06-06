@@ -4,10 +4,7 @@ import android.app.Activity
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
-import android.widget.EditText
-import android.widget.LinearLayout
-import android.widget.RelativeLayout
-import android.widget.TextView
+import android.widget.*
 import vct.profitscalculate.R
 import vct.profitscalculate.interfaces.DataCallback
 import vct.profitscalculate.models.UserModel
@@ -24,11 +21,12 @@ class ItemUserForMonth(private val activity: Activity, var userModel: UserModel,
     lateinit var edDiscount: EditText
     private lateinit var tvDiscountUnit: TextView
     private lateinit var rlDiscount: RelativeLayout
+    lateinit var cbViolate: CheckBox
 
     var dolarProfit: Double = 0.0
     var percentProfit: Double = 0.0
 
-    var discountValue = 0.0
+    var discountValue: Double = 15.0
 
     init {
         this.initView()
@@ -46,12 +44,14 @@ class ItemUserForMonth(private val activity: Activity, var userModel: UserModel,
         edDiscount = viewChild.findViewById(R.id.edDiscount)
         tvDiscountUnit = viewChild.findViewById(R.id.tvDiscountUnit)
         rlDiscount = viewChild.findViewById(R.id.rlDiscount)
+        cbViolate = viewChild.findViewById(R.id.cbViolate)
     }
 
     fun initData() {
-        lnRoot.post({ lnRoot.addView(viewChild) })
-
-        setViewData()
+        if (userModel.type != UserModel.UserModel.TYPE_HOLDER) {
+            lnRoot.post({ lnRoot.addView(viewChild) })
+            setViewData()
+        }
     }
 
     fun setViewData() {
@@ -101,20 +101,22 @@ class ItemUserForMonth(private val activity: Activity, var userModel: UserModel,
             }
 
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                if (userModel.type == UserModel.UserModel.TYPE_RELAYER) {
-                    discountValue = if (edDiscount.text.toString() == "") {
-                        0.0
-                    } else {
-                        edDiscount.text.toString().toDouble()
-                    }
+                discountValue = if (edDiscount.text.toString() == "") {
+                    0.0
+                } else {
+                    edDiscount.text.toString().toDouble()
                 }
+//                if (userModel.type == UserModel.UserModel.TYPE_RELAYER || userModel.type == UserModel.UserModel.TYPE_AFFILIATE) {
+//
+//                }
             }
         })
 
         edVol.setText("")
 
-        edDiscount.setText(userModel.discountValue.toString())
-
+        if (userModel.discountValue > 0) {
+            edDiscount.setText(userModel.discountValue.toString())
+        }
     }
 
     override fun onClick(v: View?) {
