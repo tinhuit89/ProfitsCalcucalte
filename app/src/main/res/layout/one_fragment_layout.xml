@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activity.MainActivity">
+
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/tvTitle">
+
+
+        <LinearLayout
+            android:id="@+id/lnScrollRoot"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/rlAddRelayer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/edAddName"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="3"
+                    android:hint="Tên" />
+
+                <EditText
+                    android:id="@+id/edAddCapo"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="3"
+                    android:hint="SL (capo)"
+                    android:inputType="numberDecimal" />
+
+                <RadioGroup
+                    android:id="@+id/radioGroup"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="3"
+                    android:checkedButton="@id/rbRelayer"
+                    android:orientation="vertical">
+
+                    <RadioButton
+                        android:id="@+id/rbRelayer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Relayer" />
+
+                    <RadioButton
+                        android:id="@+id/rbAffiliate"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Affiliate" />
+
+
+                    <RadioButton
+                        android:id="@+id/rbHolder"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Holder" />
+
+
+                </RadioGroup>
+
+
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btnAddRelayer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="Thêm User"
+                android:textAllCaps="false" />
+
+            <LinearLayout
+                android:id="@+id/lnItemTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#F5F5F5"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="3"
+                    android:gravity="center"
+                    android:text="Tên"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvTotalCapo"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="3"
+                    android:gravity="center"
+                    android:text="CAPO \n 0"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="3"
+                    android:gravity="center"
+                    android:text="Tỉ lệ (%)"
+                    android:textStyle="bold" />
+
+
+                <Button
+                    android:id="@+id/btnDel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:alpha="0"
+                    android:text="Xoá"
+                    android:textAllCaps="false" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/lnAddItem"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+    </ScrollView>
+</RelativeLayout>

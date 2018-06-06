@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/lnItem"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="5dp">
+
+        <RelativeLayout
+
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="6">
+
+            <TextView
+                android:id="@+id/tvName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="5dp"
+                android:layout_weight="4"
+                android:gravity="left"
+                android:text="Anh A" />
+
+            <EditText
+                android:id="@+id/edVol"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="5dp"
+                android:layout_toLeftOf="@+id/tvUnit"
+                android:layout_weight="4"
+                android:gravity="center"
+                android:inputType="numberDecimal"
+                android:text="" />
+
+            <TextView
+                android:id="@+id/tvUnit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="20dp"
+                android:gravity="center"
+                android:text="$" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/rlDiscount"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="4"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tvDiscount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:gravity="left"
+                android:text="Chiếc khấu" />
+
+            <EditText
+                android:id="@+id/edDiscount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="5dp"
+                android:layout_toRightOf="@+id/tvDiscount"
+                android:gravity="center"
+                android:inputType="numberDecimal"
+                android:text="" />
+
+            <TextView
+                android:id="@+id/tvDiscountUnit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@+id/edDiscount"
+                android:gravity="center"
+                android:text="%" />
+
+        </RelativeLayout>
+
+
+    </LinearLayout>
+
+
+</LinearLayout>
