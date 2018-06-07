@@ -11,14 +11,14 @@ import vct.profitscalculate.R
 import vct.profitscalculate.common.Utilities
 import vct.profitscalculate.interfaces.DataCallback
 import vct.profitscalculate.interfaces.MonthProfitInterface
-import vct.profitscalculate.models.MonthProfitModel
+import vct.profitscalculate.models.ReportModel
 import java.util.*
 
-class MonthAdapter(private val activity: Activity, private val callback: DataCallback) : ArrayAdapter<MonthProfitModel>(activity, R.layout.item_report_layout) {
+class MonthAdapter(private val activity: Activity, private val callback: DataCallback) : ArrayAdapter<ReportModel>(activity, R.layout.item_report_layout) {
 
-    val listItems: ArrayList<MonthProfitModel>
+    val listItems: ArrayList<ReportModel>
         get() {
-            val listItems = ArrayList<MonthProfitModel>()
+            val listItems = ArrayList<ReportModel>()
             for (i in 0 until count) {
                 listItems.add(getItem(i))
             }
@@ -37,7 +37,7 @@ class MonthAdapter(private val activity: Activity, private val callback: DataCal
 
     }
 
-    fun addListItems(popups: List<MonthProfitModel>) {
+    fun addListItems(popups: List<ReportModel>) {
         for (obj in popups) {
             add(obj)
         }
@@ -72,7 +72,7 @@ class MonthAdapter(private val activity: Activity, private val callback: DataCal
         holder.btnViewReport.visibility = View.VISIBLE
 
 
-        if (position % 2 == 0) {
+        if (position % 2 != 0) {
             holder.rlItem.setBackgroundColor(Color.parseColor("#f0fefc"))
         } else {
             holder.rlItem.setBackgroundColor(Color.parseColor("#ffffff"))
@@ -86,8 +86,8 @@ class MonthAdapter(private val activity: Activity, private val callback: DataCal
         }
 
         holder.btnDel.setOnClickListener {
+            remove(item)
             if (MonthProfitInterface.deleteMonth(AppController.realmInstance(), item.id)) {
-                remove(item)
                 notifyDataSetChanged()
             }
         }

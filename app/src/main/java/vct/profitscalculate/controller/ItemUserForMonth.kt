@@ -23,8 +23,8 @@ class ItemUserForMonth(private val activity: Activity, var userModel: UserModel,
     private lateinit var rlDiscount: RelativeLayout
     lateinit var cbViolate: CheckBox
 
-    var dolarProfit: Double = 0.0
-    var percentProfit: Double = 0.0
+    var revenueMonthly: Double = 0.0
+    var percentMonthly: Double = 0.0
 
     var discountValue: Double = 15.0
 
@@ -48,7 +48,7 @@ class ItemUserForMonth(private val activity: Activity, var userModel: UserModel,
     }
 
     fun initData() {
-        if (userModel.type != UserModel.UserModel.TYPE_HOLDER) {
+        if (userModel.type != UserModel.TYPE_HOLDER) {
             lnRoot.post({ lnRoot.addView(viewChild) })
             setViewData()
         }
@@ -57,7 +57,7 @@ class ItemUserForMonth(private val activity: Activity, var userModel: UserModel,
     fun setViewData() {
         tvName.text = userModel.name
 
-        if (userModel.type == UserModel.UserModel.TYPE_RELAYER) {
+        if (userModel.type == UserModel.TYPE_RELAYER) {
             tvUnit.text = "($)"
         } else {
             tvUnit.text = "(%)"
@@ -75,14 +75,14 @@ class ItemUserForMonth(private val activity: Activity, var userModel: UserModel,
             }
 
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                if (userModel.type == UserModel.UserModel.TYPE_RELAYER) {
-                    dolarProfit = if (edVol.text.toString() == "") {
+                if (userModel.type == UserModel.TYPE_RELAYER) {
+                    revenueMonthly = if (edVol.text.toString() == "") {
                         0.0
                     } else {
                         edVol.text.toString().toDouble()
                     }
-                } else if (userModel.type == UserModel.UserModel.TYPE_AFFILIATE) {
-                    percentProfit = if (edVol.text.toString() == "") {
+                } else if (userModel.type == UserModel.TYPE_AFFILIATE) {
+                    percentMonthly = if (edVol.text.toString() == "") {
                         0.0
                     } else {
                         edVol.text.toString().toDouble()
@@ -106,7 +106,7 @@ class ItemUserForMonth(private val activity: Activity, var userModel: UserModel,
                 } else {
                     edDiscount.text.toString().toDouble()
                 }
-//                if (userModel.type == UserModel.UserModel.TYPE_RELAYER || userModel.type == UserModel.UserModel.TYPE_AFFILIATE) {
+//                if (userModel.type == UserModel.TYPE_RELAYER || userModel.type == UserModel.TYPE_AFFILIATE) {
 //
 //                }
             }

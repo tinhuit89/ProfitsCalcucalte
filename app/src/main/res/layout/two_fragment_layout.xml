@@ -232,17 +232,34 @@
 
             </LinearLayout>
 
-            <EditText
-                android:id="@+id/edMonthName"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:gravity="center"
-                android:hint="Nhập tên tháng"
-                android:inputType="numberDecimal"
-                android:text=""
-                android:textSize="16dp"
-                android:textStyle="bold" />
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/edMonthName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:gravity="center"
+                    android:hint="Nhập tên tháng"
+                    android:inputType="numberDecimal"
+                    android:text=""
+                    android:textSize="16dp"
+                    android:textStyle="bold" />
+
+                <CheckBox
+                    android:id="@+id/cbQuater"
+                    android:layout_marginLeft="5dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:text="Kêt thức Quý" />
+
+            </LinearLayout>
+
 
             <Button
                 android:id="@+id/btnAddMonth"

@@ -6,21 +6,18 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
+import android.widget.*
 import vct.profitscalculate.R
 import vct.profitscalculate.activity.MainTabActivity
 import vct.profitscalculate.common.Constants
 import vct.profitscalculate.controller.ItemUserForMonth
 import vct.profitscalculate.interfaces.DataCallback
 import vct.profitscalculate.models.UserModel
-import android.widget.LinearLayout
-import android.widget.EditText
-import android.widget.TextView
-import io.realm.Realm
 import vct.profitscalculate.AppController
 import vct.profitscalculate.common.Utilities
 import vct.profitscalculate.interfaces.MonthProfitInterface
-import vct.profitscalculate.models.MonthProfitModel
+import vct.profitscalculate.interfaces.UserInterface
+import vct.profitscalculate.models.ReportModel
 
 
 class TwoFragment : Fragment(), View.OnClickListener {
@@ -42,6 +39,7 @@ class TwoFragment : Fragment(), View.OnClickListener {
     private lateinit var tvResult: TextView
     private lateinit var lnHolderProfit: LinearLayout
     private lateinit var edMonthName: EditText
+    private lateinit var cbQuater: CheckBox
 
     private var listUserForMonth: ArrayList<ItemUserForMonth> = ArrayList()
 
@@ -71,6 +69,7 @@ class TwoFragment : Fragment(), View.OnClickListener {
         tvResult = view.findViewById(R.id.tvResult)
         lnHolderProfit = view.findViewById(R.id.lnHolderProfit)
         edMonthName = view.findViewById(R.id.edMonthName)
+        cbQuater = view.findViewById(R.id.cbQuater)
     }
 
     private fun initData() {
@@ -81,6 +80,7 @@ class TwoFragment : Fragment(), View.OnClickListener {
         edPercentHolders.setText("15")
         btnAddMonth.setOnClickListener(this)
 
+        setDataMonth()
     }
 
     private fun setDataMonth() {
@@ -91,16 +91,15 @@ class TwoFragment : Fragment(), View.OnClickListener {
         edPercentFromAffiliates.setText("0")
         for (itemUserController in activity.listItemUserController) {
             when {
-                itemUserController.userModel.type == UserModel.UserModel.TYPE_RELAYER -> listUserForMonth.add(ItemUserForMonth(activity, itemUserController.userModel, lnRelayerProfit, dataCallback))
-                itemUserController.userModel.type == UserModel.UserModel.TYPE_AFFILIATE -> listUserForMonth.add(ItemUserForMonth(activity, itemUserController.userModel, lnAffiliateProfit, dataCallback))
-                itemUserController.userModel.type == UserModel.UserModel.TYPE_HOLDER -> listUserForMonth.add(ItemUserForMonth(activity, itemUserController.userModel, lnHolderProfit, dataCallback))
+                itemUserController.userModel.type == UserModel.TYPE_RELAYER -> listUserForMonth.add(ItemUserForMonth(activity, itemUserController.userModel, lnRelayerProfit, dataCallback))
+                itemUserController.userModel.type == UserModel.TYPE_AFFILIATE -> listUserForMonth.add(ItemUserForMonth(activity, itemUserController.userModel, lnAffiliateProfit, dataCallback))
+                itemUserController.userModel.type == UserModel.TYPE_HOLDER -> listUserForMonth.add(ItemUserForMonth(activity, itemUserController.userModel, lnHolderProfit, dataCallback))
             }
         }
     }
 
     override fun onResume() {
         super.onResume()
-        setDataMonth()
     }
 
     private val dataCallback: DataCallback = object : DataCallback {
@@ -119,7 +118,7 @@ class TwoFragment : Fragment(), View.OnClickListener {
             }
 
             for (itemUserForMonth in listUserForMonth) {
-                if (itemUserForMonth.userModel.type == UserModel.UserModel.TYPE_RELAYER) {
+                if (itemUserForMonth.userModel.type == UserModel.TYPE_RELAYER) {
                     if (itemUserForMonth.edVol.text.toString() == "" || itemUserForMonth.edVol.text.toString().toDouble() < 0) {
                         return Utilities.showToast(activity, "Vui lòng nhập đầy đủ fee thu được trên từng Relayer")
                     }
@@ -129,7 +128,7 @@ class TwoFragment : Fragment(), View.OnClickListener {
                     }
                 }
 
-                if (itemUserForMonth.userModel.type == UserModel.UserModel.TYPE_AFFILIATE) {
+                if (itemUserForMonth.userModel.type == UserModel.TYPE_AFFILIATE) {
                     if (itemUserForMonth.edVol.text.toString() == "" || itemUserForMonth.edVol.text.toString().toDouble() < 0) {
                         return Utilities.showToast(activity, "Vui lòng nhập đầy đủ tỉ lệ mang khách về của affiliate hàng tháng ")
                     }
@@ -144,66 +143,53 @@ class TwoFragment : Fragment(), View.OnClickListener {
 
             var nameMonth = "Tháng " + edMonthName.text.toString()
 
-            var monthProfitModel = MonthProfitModel(name = nameMonth)
-            monthProfitModel.isQuater = (monthProfitModel.id % 3 == 0L)
+            var monthProfitModel = ReportModel(name = nameMonth, type = ReportModel.TYPE_MONTH)
+            monthProfitModel.isQuater = cbQuater.isChecked
             monthProfitModel.percentFromAffiliate = edPercentFromAffiliates.text.toString().toDouble()
 
+
             var totalProfitOfMonth = 0.0
-            for (itemUserForMonth in listUserForMonth) {
+            var maxIdUserDb = UserInterface.getMaxId(realmInstance)
+            for ((index, itemUserForMonth) in listUserForMonth.withIndex()) {
                 itemUserForMonth.userModel.discountValue = itemUserForMonth.discountValue
 
-                if (itemUserForMonth.userModel.type == UserModel.UserModel.TYPE_RELAYER) {
-                    itemUserForMonth.userModel.profitTakeMonth = itemUserForMonth.dolarProfit //* (100 - monthProfitModel.percentFromAffiliate)
-                    totalProfitOfMonth += itemUserForMonth.dolarProfit
+                if (itemUserForMonth.userModel.type == UserModel.TYPE_RELAYER) {
+                    itemUserForMonth.userModel.revenueMonthly = itemUserForMonth.revenueMonthly
+                    totalProfitOfMonth += itemUserForMonth.revenueMonthly
                 }
 
-                if (itemUserForMonth.userModel.type == UserModel.UserModel.TYPE_AFFILIATE) {
-                    itemUserForMonth.userModel.percentTakeMonth = itemUserForMonth.percentProfit
-                }
-
-            }
-
-            for (itemUserForMonth in listUserForMonth) {
-
-                if (itemUserForMonth.userModel.type == UserModel.UserModel.TYPE_RELAYER) {
-                    itemUserForMonth.userModel.percentTakeMonth = itemUserForMonth.userModel.profitTakeMonth * 100 / totalProfitOfMonth
-                }
-
-                if (itemUserForMonth.userModel.type == UserModel.UserModel.TYPE_AFFILIATE) {
-                    val amountWithTotal = monthProfitModel.percentFromAffiliate / 100 * totalProfitOfMonth
-                    itemUserForMonth.userModel.profitTakeMonth = itemUserForMonth.userModel.percentTakeMonth / 100 * amountWithTotal
+                if (itemUserForMonth.userModel.type == UserModel.TYPE_AFFILIATE) {
+                    itemUserForMonth.userModel.percentMonthly = itemUserForMonth.percentMonthly
                 }
 
                 if (itemUserForMonth.cbViolate.isChecked) {
                     itemUserForMonth.userModel.isViolate = true
+                    itemUserForMonth.userModel.blockAtMonthId = monthProfitModel.id
+                    itemUserForMonth.userModel.finesMustPaid += ReportModel.finePaidCount
                 }
-                monthProfitModel.listUser.add(itemUserForMonth.userModel)
+                var userCopy = itemUserForMonth.userModel.copy()
+                userCopy.id = userCopy.id + (index + 1) + maxIdUserDb
+                userCopy.isReport = true
+                monthProfitModel.listUser.add(userCopy)
             }
-
-//            for (itemUserForMonth in listUserForMonth) {
-//
-//                if (itemUserForMonth.userModel.type == UserModel.UserModel.TYPE_RELAYER) {
-//                    itemUserForMonth.userModel.percentTakeMonth = itemUserForMonth.userModel.profitTakeMonth * (100 - monthProfitModel.percentFromAffiliate) / totalProfitOfMonth
-//                }
-//
-//                if (itemUserForMonth.userModel.type == UserModel.UserModel.TYPE_AFFILIATE) {
-//                    itemUserForMonth.userModel.profitTakeMonth = itemUserForMonth.userModel.percentTakeMonth * (monthProfitModel.percentFromAffiliate * totalProfitOfMonth / 100)
-//                }
-//
-//                if (itemUserForMonth.cbViolate.isChecked) {
-//                    itemUserForMonth.userModel.isViolate = true
-//                }
-//                monthProfitModel.listUser.add(itemUserForMonth.userModel)
-//            }
 
             monthProfitModel.totalProfitOfMonth = totalProfitOfMonth
 
-            monthProfitModel.executeCalculateProfit()
+            var quaterReport: ReportModel? = null
+            if (monthProfitModel.isQuater) {
+                quaterReport = monthProfitModel.copy(name = "Tổng kế Quý", type = ReportModel.TYPE_QUATER)
+            }
+
+            monthProfitModel.executeCalculateCrossMonth()
 
             var monthAdded = MonthProfitInterface.addMonth(realmInstance, monthProfitModel)
 
+            if (quaterReport != null) {
+                quaterReport.executeCrossForQuater()
+                var quaterReportAdded = MonthProfitInterface.addMonth(realmInstance, quaterReport)
+            }
+
             if (monthAdded != null) {
-                Log.d(Constants.TAG, "Create with id: ${monthAdded.id}")
                 Utilities.showToast(activity, "Tạo doanh thu thành công")
             }
         }

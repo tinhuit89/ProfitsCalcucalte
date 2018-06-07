@@ -9,4 +9,6 @@ object Constants {
     const val VIEW_REPORT = "VIEW_REPORT"
     /*Define tag*/
     const val TAG = "tinhvc"
+
+    const val TYPE_EXERCISE = 3
 }

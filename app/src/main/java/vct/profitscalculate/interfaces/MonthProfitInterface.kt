@@ -6,7 +6,7 @@ import android.util.Log
 import io.realm.Realm
 import io.realm.kotlin.where
 import vct.profitscalculate.common.Constants
-import vct.profitscalculate.models.MonthProfitModel
+import vct.profitscalculate.models.ReportModel
 
 class MonthProfitInterface {
     companion object {
@@ -15,7 +15,7 @@ class MonthProfitInterface {
         fun getMaxId(realm: Realm): Long {
             return try {
                 realm.beginTransaction()
-                var nextID = (realm.where(MonthProfitModel::class.java).max("id"))
+                var nextID = (realm.where(ReportModel::class.java).max("id"))
                 nextID = if (nextID != null) {
                     nextID as Long + 1L
                 } else {
@@ -29,16 +29,16 @@ class MonthProfitInterface {
             }
         }
 
-        fun addMonth(realm: Realm, model: MonthProfitModel): MonthProfitModel? {
+        fun addMonth(realm: Realm, model: ReportModel): ReportModel? {
             return try {
                 realm.beginTransaction()
-//                var nextID = (realm.where(MonthProfitModel::class.java).max("id"))
-//                nextID = if (nextID != null) {
-//                    nextID as Long + 1L
-//                } else {
-//                    0L
-//                }
-//                user.id = nextID
+                var nextID = (realm.where(ReportModel::class.java).max("id"))
+                nextID = if (nextID != null) {
+                    nextID as Long + 1L
+                } else {
+                    0L
+                }
+                model.id = nextID
                 var monthAdded = realm.copyToRealmOrUpdate(model)
                 realm.commitTransaction()
                 monthAdded
@@ -51,7 +51,7 @@ class MonthProfitInterface {
         fun deleteMonth(realm: Realm, id: Long): Boolean {
             realm.beginTransaction()
             return try {
-                var modelGet = realm.where(MonthProfitModel::class.java).equalTo("id", id).findFirst()
+                var modelGet = realm.where(ReportModel::class.java).equalTo("id", id).findFirst()
                 if (modelGet != null) {
                     Log.d(Constants.TAG, "Month delete: $modelGet")
                     modelGet.deleteFromRealm()
@@ -68,7 +68,7 @@ class MonthProfitInterface {
         }
 
         fun getTotalHold(realm: Realm): Double {
-            var listUserFromdb = realm.where<vct.profitscalculate.models.MonthProfitModel>().findAll()
+            var listUserFromdb = realm.where<vct.profitscalculate.models.ReportModel>().findAll()
             return listUserFromdb.sum("capoVolume").toDouble()
         }
     }

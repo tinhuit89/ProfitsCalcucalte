@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ListView
-import io.realm.Realm
 import io.realm.kotlin.where
 import vct.profitscalculate.AppController
 import vct.profitscalculate.R
@@ -15,7 +14,7 @@ import vct.profitscalculate.activity.MainTabActivity
 import vct.profitscalculate.adapter.MonthAdapter
 import vct.profitscalculate.common.Constants
 import vct.profitscalculate.interfaces.DataCallback
-import vct.profitscalculate.models.MonthProfitModel
+import vct.profitscalculate.models.ReportModel
 
 
 class ThreeFragment : Fragment(), View.OnClickListener {
@@ -50,7 +49,6 @@ class ThreeFragment : Fragment(), View.OnClickListener {
             swipeLayout.isRefreshing = false
             resetData()
         }
-        resetData()
     }
 
     private fun setAdapter() {
@@ -60,19 +58,24 @@ class ThreeFragment : Fragment(), View.OnClickListener {
 
     private fun resetData() {
         setAdapter()
-        val listItemDb = realmInstance.where<MonthProfitModel>().findAll()
+        val listItemDb = realmInstance.where<ReportModel>().findAll()
         monthAdapter.addListItems(listItemDb)
     }
 
     private val dataCallback: DataCallback = object : DataCallback {
         override fun callback(action: String, pos: Int, objects: Any) {
             if (action == Constants.VIEW_REPORT) {
-//                var monthModel = (objects as MonthProfitModel)
+//                var monthModel = (objects as ReportModel)
 
 
             }
 
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        resetData()
     }
 
     override fun onClick(v: View?) {

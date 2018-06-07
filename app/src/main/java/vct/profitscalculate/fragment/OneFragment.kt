@@ -18,6 +18,8 @@ import vct.profitscalculate.common.Utilities
 import vct.profitscalculate.controller.ItemAddUserController
 import vct.profitscalculate.interfaces.DataCallback
 import vct.profitscalculate.interfaces.UserInterface
+import android.content.Intent
+
 
 class OneFragment : Fragment(), View.OnClickListener {
 
@@ -34,6 +36,7 @@ class OneFragment : Fragment(), View.OnClickListener {
     private lateinit var btnAddRelayer: Button
     private lateinit var lnAddItem: LinearLayout
     private lateinit var tvTotalCapo: TextView
+    private lateinit var btnResetData: Button
 
     private val realmInstance = AppController.realmInstance()
 
@@ -58,94 +61,118 @@ class OneFragment : Fragment(), View.OnClickListener {
         btnAddRelayer = view.findViewById(R.id.btnAddRelayer)
         lnAddItem = view.findViewById(R.id.lnAddItem)
         tvTotalCapo = view.findViewById(R.id.tvTotalCapo)
+        btnResetData = view.findViewById(R.id.btnResetData)
+    }
+
+    private fun resetData() {
+        try {
+            realmInstance.beginTransaction()
+            realmInstance.deleteAll()
+            realmInstance.commitTransaction()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+//        activity.listItemUserController = arrayListOf()
+//        activity.listUsers = arrayListOf()
+//        activity.resetPager()
+//        initData()
+        val intent = Intent(getActivity(), MainTabActivity::class.java)
+        activity.startActivity(intent)
+        activity.finish()
     }
 
     private fun initData() {
         btnAddRelayer.setOnClickListener(this)
+        btnResetData.setOnClickListener(this)
 
-        var listUserFromdb = realmInstance.where<UserModel>().findAll()
+        var listUserFromdb = realmInstance.where<UserModel>().equalTo("isReport", false).findAll().toList()
 
         Log.d(Constants.TAG, listUserFromdb.size.toString())
-        if (listUserFromdb.size > 0) {
+        if (!listUserFromdb.isEmpty()) {
             for (userModel in listUserFromdb) {
                 addItemUserController(userModel)
             }
         } else {
             var listUserDefault = ArrayList<UserModel>()
 
-            // Bài tập 1
-//            listUserDefault.add(UserModel(name = "capodex.com", capoVolume = 10000.0, type = UserModel.UserModel.TYPE_RELAYER, discountValue = 35.0))
-//            listUserDefault.add(UserModel(name = "dex.traderviet.com", capoVolume = 10000.0, type = UserModel.UserModel.TYPE_RELAYER, discountValue = 35.0))
-//            listUserDefault.add(UserModel(name = "dex.blogtienao.com", capoVolume = 50000.0, type = UserModel.UserModel.TYPE_RELAYER, discountValue = 35.0))
-//
-//            listUserDefault.add(UserModel(name = "A1", capoVolume = 0.0, type = UserModel.UserModel.TYPE_AFFILIATE, discountValue = 15.0))
-//            listUserDefault.add(UserModel(name = "A2", capoVolume = 0.0, type = UserModel.UserModel.TYPE_AFFILIATE, discountValue = 15.0))
-//            listUserDefault.add(UserModel(name = "A3", capoVolume = 0.0, type = UserModel.UserModel.TYPE_AFFILIATE, discountValue = 15.0))
-//            listUserDefault.add(UserModel(name = "A4", capoVolume = 0.0, type = UserModel.UserModel.TYPE_AFFILIATE, discountValue = 15.0))
-//            listUserDefault.add(UserModel(name = "A5", capoVolume = 0.0, type = UserModel.UserModel.TYPE_AFFILIATE, discountValue = 15.0))
-//
-//            listUserDefault.add(UserModel(name = "H1", capoVolume = 4000.0, type = UserModel.UserModel.TYPE_HOLDER, discountValue = 15.0))
-//            listUserDefault.add(UserModel(name = "H2", capoVolume = 4000.0, type = UserModel.UserModel.TYPE_HOLDER, discountValue = 15.0))
-//            listUserDefault.add(UserModel(name = "H3", capoVolume = 4000.0, type = UserModel.UserModel.TYPE_HOLDER, discountValue = 15.0))
-//            listUserDefault.add(UserModel(name = "H4", capoVolume = 4000.0, type = UserModel.UserModel.TYPE_HOLDER, discountValue = 15.0))
-//            listUserDefault.add(UserModel(name = "H5", capoVolume = 4000.0, type = UserModel.UserModel.TYPE_HOLDER, discountValue = 15.0))
-//            listUserDefault.add(UserModel(name = "H6", capoVolume = 4000.0, type = UserModel.UserModel.TYPE_HOLDER, discountValue = 15.0))
-//            listUserDefault.add(UserModel(name = "H7", capoVolume = 4000.0, type = UserModel.UserModel.TYPE_HOLDER, discountValue = 15.0))
+            if (Constants.TYPE_EXERCISE == 1) {
+                //Bài tập 1
+                listUserDefault.add(UserModel(name = "capodex.com", capoVolume = 10000.0, type = UserModel.TYPE_RELAYER, discountValue = 35.0, isReport = false))
+                listUserDefault.add(UserModel(name = "dex.traderviet.com", capoVolume = 10000.0, type = UserModel.TYPE_RELAYER, discountValue = 35.0, isReport = false))
+                listUserDefault.add(UserModel(name = "dex.blogtienao.com", capoVolume = 50000.0, type = UserModel.TYPE_RELAYER, discountValue = 35.0, isReport = false))
 
-            // Bài tập 2
-//            listUserDefault.add(UserModel(name = "capodex.com", capoVolume = 20000.0, type = UserModel.UserModel.TYPE_RELAYER, discountValue = 35.0))
-//            listUserDefault.add(UserModel(name = "dex.traderviet.com", capoVolume = 60000.0, type = UserModel.UserModel.TYPE_RELAYER, discountValue = 25.0))
-//            listUserDefault.add(UserModel(name = "dex.blogtienao.com", capoVolume = 500000.0, type = UserModel.UserModel.TYPE_RELAYER, discountValue = 45.0))
-//
-//            listUserDefault.add(UserModel(name = "A1", capoVolume = 0.0, type = UserModel.UserModel.TYPE_AFFILIATE, discountValue = 15.0))
-//            listUserDefault.add(UserModel(name = "A2", capoVolume = 0.0, type = UserModel.UserModel.TYPE_AFFILIATE, discountValue = 15.0))
-//            listUserDefault.add(UserModel(name = "A3", capoVolume = 0.0, type = UserModel.UserModel.TYPE_AFFILIATE, discountValue = 15.0))
-//            listUserDefault.add(UserModel(name = "A4", capoVolume = 0.0, type = UserModel.UserModel.TYPE_AFFILIATE, discountValue = 15.0))
-//            listUserDefault.add(UserModel(name = "A5", capoVolume = 0.0, type = UserModel.UserModel.TYPE_AFFILIATE, discountValue = 15.0))
-//
-//            listUserDefault.add(UserModel(name = "H1", capoVolume = 8000.0, type = UserModel.UserModel.TYPE_HOLDER, discountValue = 15.0))
-//            listUserDefault.add(UserModel(name = "H2", capoVolume = 8000.0, type = UserModel.UserModel.TYPE_HOLDER, discountValue = 15.0))
-//            listUserDefault.add(UserModel(name = "H3", capoVolume = 8000.0, type = UserModel.UserModel.TYPE_HOLDER, discountValue = 15.0))
-//            listUserDefault.add(UserModel(name = "H4", capoVolume = 10000.0, type = UserModel.UserModel.TYPE_HOLDER, discountValue = 15.0))
-//            listUserDefault.add(UserModel(name = "H5", capoVolume = 10000.0, type = UserModel.UserModel.TYPE_HOLDER, discountValue = 15.0))
-//            listUserDefault.add(UserModel(name = "H6", capoVolume = 10000.0, type = UserModel.UserModel.TYPE_HOLDER, discountValue = 15.0))
-//            listUserDefault.add(UserModel(name = "H7", capoVolume = 15000.0, type = UserModel.UserModel.TYPE_HOLDER, discountValue = 15.0))
-//            listUserDefault.add(UserModel(name = "H8", capoVolume = 15000.0, type = UserModel.UserModel.TYPE_HOLDER, discountValue = 15.0))
-//            listUserDefault.add(UserModel(name = "H9", capoVolume = 15000.0, type = UserModel.UserModel.TYPE_HOLDER, discountValue = 15.0))
-//            listUserDefault.add(UserModel(name = "H10", capoVolume = 2000.0, type = UserModel.UserModel.TYPE_HOLDER, discountValue = 15.0))
-//            listUserDefault.add(UserModel(name = "H11", capoVolume = 2000.0, type = UserModel.UserModel.TYPE_HOLDER, discountValue = 15.0))
-//            listUserDefault.add(UserModel(name = "H12", capoVolume = 2000.0, type = UserModel.UserModel.TYPE_HOLDER, discountValue = 15.0))
+                listUserDefault.add(UserModel(name = "A1", capoVolume = 0.0, type = UserModel.TYPE_AFFILIATE, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "A2", capoVolume = 0.0, type = UserModel.TYPE_AFFILIATE, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "A3", capoVolume = 0.0, type = UserModel.TYPE_AFFILIATE, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "A4", capoVolume = 0.0, type = UserModel.TYPE_AFFILIATE, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "A5", capoVolume = 0.0, type = UserModel.TYPE_AFFILIATE, discountValue = 15.0, isReport = false))
 
-            // Bài tập 3
-            listUserDefault.add(UserModel(name = "capodex.com", capoVolume = 80000.0, type = UserModel.UserModel.TYPE_RELAYER, discountValue = 35.0))
-            listUserDefault.add(UserModel(name = "dex.traderviet.com", capoVolume = 120000.0, type = UserModel.UserModel.TYPE_RELAYER, discountValue = 25.0))
-            listUserDefault.add(UserModel(name = "dex.blogtienao.com", capoVolume = 120000.0, type = UserModel.UserModel.TYPE_RELAYER, discountValue = 40.0))
-            listUserDefault.add(UserModel(name = "dex.nami.trade", capoVolume = 180000.0, type = UserModel.UserModel.TYPE_RELAYER, discountValue = 30.0))
+                listUserDefault.add(UserModel(name = "H1", capoVolume = 4000.0, type = UserModel.TYPE_HOLDER, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "H2", capoVolume = 4000.0, type = UserModel.TYPE_HOLDER, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "H3", capoVolume = 4000.0, type = UserModel.TYPE_HOLDER, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "H4", capoVolume = 4000.0, type = UserModel.TYPE_HOLDER, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "H5", capoVolume = 4000.0, type = UserModel.TYPE_HOLDER, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "H6", capoVolume = 4000.0, type = UserModel.TYPE_HOLDER, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "H7", capoVolume = 4000.0, type = UserModel.TYPE_HOLDER, discountValue = 15.0, isReport = false))
 
-            listUserDefault.add(UserModel(name = "A1", capoVolume = 0.0, type = UserModel.UserModel.TYPE_AFFILIATE, discountValue = 0.0))
-            listUserDefault.add(UserModel(name = "A2", capoVolume = 0.0, type = UserModel.UserModel.TYPE_AFFILIATE, discountValue = 0.0))
-            listUserDefault.add(UserModel(name = "A3", capoVolume = 0.0, type = UserModel.UserModel.TYPE_AFFILIATE, discountValue = 0.0))
-            listUserDefault.add(UserModel(name = "A4", capoVolume = 0.0, type = UserModel.UserModel.TYPE_AFFILIATE, discountValue = 0.0))
-            listUserDefault.add(UserModel(name = "A5", capoVolume = 0.0, type = UserModel.UserModel.TYPE_AFFILIATE, discountValue = 0.0))
+            } else if (Constants.TYPE_EXERCISE == 2) {
+                // Bài tập 2
+                listUserDefault.add(UserModel(name = "capodex.com", capoVolume = 20000.0, type = UserModel.TYPE_RELAYER, discountValue = 35.0, isReport = false))
+                listUserDefault.add(UserModel(name = "dex.traderviet.com", capoVolume = 60000.0, type = UserModel.TYPE_RELAYER, discountValue = 25.0, isReport = false))
+                listUserDefault.add(UserModel(name = "dex.blogtienao.com", capoVolume = 500000.0, type = UserModel.TYPE_RELAYER, discountValue = 45.0, isReport = false))
 
-            listUserDefault.add(UserModel(name = "H1", capoVolume = 8000.0, type = UserModel.UserModel.TYPE_HOLDER, discountValue = 15.0))
-            listUserDefault.add(UserModel(name = "H2", capoVolume = 8000.0, type = UserModel.UserModel.TYPE_HOLDER, discountValue = 15.0))
-            listUserDefault.add(UserModel(name = "H3", capoVolume = 8000.0, type = UserModel.UserModel.TYPE_HOLDER, discountValue = 15.0))
-            listUserDefault.add(UserModel(name = "H4", capoVolume = 10500.0, type = UserModel.UserModel.TYPE_HOLDER, discountValue = 15.0))
-            listUserDefault.add(UserModel(name = "H5", capoVolume = 10500.0, type = UserModel.UserModel.TYPE_HOLDER, discountValue = 15.0))
-            listUserDefault.add(UserModel(name = "H6", capoVolume = 10500.0, type = UserModel.UserModel.TYPE_HOLDER, discountValue = 15.0))
-            listUserDefault.add(UserModel(name = "H7", capoVolume = 15000.0, type = UserModel.UserModel.TYPE_HOLDER, discountValue = 15.0))
-            listUserDefault.add(UserModel(name = "H8", capoVolume = 15000.0, type = UserModel.UserModel.TYPE_HOLDER, discountValue = 15.0))
-            listUserDefault.add(UserModel(name = "H9", capoVolume = 15000.0, type = UserModel.UserModel.TYPE_HOLDER, discountValue = 15.0))
-            listUserDefault.add(UserModel(name = "H10", capoVolume = 20000.0, type = UserModel.UserModel.TYPE_HOLDER, discountValue = 15.0))
-            listUserDefault.add(UserModel(name = "H11", capoVolume = 20000.0, type = UserModel.UserModel.TYPE_HOLDER, discountValue = 15.0))
-            listUserDefault.add(UserModel(name = "H12", capoVolume = 20000.0, type = UserModel.UserModel.TYPE_HOLDER, discountValue = 15.0))
-            listUserDefault.add(UserModel(name = "H13", capoVolume = 23500.0, type = UserModel.UserModel.TYPE_HOLDER, discountValue = 15.0))
-            listUserDefault.add(UserModel(name = "H14", capoVolume = 23500.0, type = UserModel.UserModel.TYPE_HOLDER, discountValue = 15.0))
-            listUserDefault.add(UserModel(name = "H15", capoVolume = 23500.0, type = UserModel.UserModel.TYPE_HOLDER, discountValue = 15.0))
-            listUserDefault.add(UserModel(name = "H16", capoVolume = 29700.0, type = UserModel.UserModel.TYPE_HOLDER, discountValue = 15.0))
-            listUserDefault.add(UserModel(name = "H17", capoVolume = 29700.0, type = UserModel.UserModel.TYPE_HOLDER, discountValue = 15.0))
-            listUserDefault.add(UserModel(name = "H18", capoVolume = 29700.0, type = UserModel.UserModel.TYPE_HOLDER, discountValue = 15.0))
+                listUserDefault.add(UserModel(name = "A1", capoVolume = 0.0, type = UserModel.TYPE_AFFILIATE, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "A2", capoVolume = 0.0, type = UserModel.TYPE_AFFILIATE, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "A3", capoVolume = 0.0, type = UserModel.TYPE_AFFILIATE, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "A4", capoVolume = 0.0, type = UserModel.TYPE_AFFILIATE, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "A5", capoVolume = 0.0, type = UserModel.TYPE_AFFILIATE, discountValue = 15.0, isReport = false))
+
+                listUserDefault.add(UserModel(name = "H1", capoVolume = 8000.0, type = UserModel.TYPE_HOLDER, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "H2", capoVolume = 8000.0, type = UserModel.TYPE_HOLDER, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "H3", capoVolume = 8000.0, type = UserModel.TYPE_HOLDER, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "H4", capoVolume = 10000.0, type = UserModel.TYPE_HOLDER, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "H5", capoVolume = 10000.0, type = UserModel.TYPE_HOLDER, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "H6", capoVolume = 10000.0, type = UserModel.TYPE_HOLDER, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "H7", capoVolume = 15000.0, type = UserModel.TYPE_HOLDER, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "H8", capoVolume = 15000.0, type = UserModel.TYPE_HOLDER, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "H9", capoVolume = 15000.0, type = UserModel.TYPE_HOLDER, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "H10", capoVolume = 2000.0, type = UserModel.TYPE_HOLDER, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "H11", capoVolume = 2000.0, type = UserModel.TYPE_HOLDER, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "H12", capoVolume = 2000.0, type = UserModel.TYPE_HOLDER, discountValue = 15.0, isReport = false))
+
+            } else if (Constants.TYPE_EXERCISE == 3) {
+                // Bài tập 3
+                listUserDefault.add(UserModel(name = "capodex.com", capoVolume = 80000.0, type = UserModel.TYPE_RELAYER, discountValue = 35.0, isReport = false))
+                listUserDefault.add(UserModel(name = "dex.traderviet.com", capoVolume = 120000.0, type = UserModel.TYPE_RELAYER, discountValue = 25.0, isReport = false))
+                listUserDefault.add(UserModel(name = "dex.blogtienao.com", capoVolume = 120000.0, type = UserModel.TYPE_RELAYER, discountValue = 40.0, isReport = false))
+                listUserDefault.add(UserModel(name = "dex.nami.trade", capoVolume = 180000.0, type = UserModel.TYPE_RELAYER, discountValue = 30.0, isReport = false))
+
+                listUserDefault.add(UserModel(name = "A1", capoVolume = 0.0, type = UserModel.TYPE_AFFILIATE, discountValue = 0.0, isReport = false))
+                listUserDefault.add(UserModel(name = "A2", capoVolume = 0.0, type = UserModel.TYPE_AFFILIATE, discountValue = 0.0, isReport = false))
+                listUserDefault.add(UserModel(name = "A3", capoVolume = 0.0, type = UserModel.TYPE_AFFILIATE, discountValue = 0.0, isReport = false))
+                listUserDefault.add(UserModel(name = "A4", capoVolume = 0.0, type = UserModel.TYPE_AFFILIATE, discountValue = 0.0, isReport = false))
+                listUserDefault.add(UserModel(name = "A5", capoVolume = 0.0, type = UserModel.TYPE_AFFILIATE, discountValue = 0.0, isReport = false))
+
+                listUserDefault.add(UserModel(name = "H1", capoVolume = 8000.0, type = UserModel.TYPE_HOLDER, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "H2", capoVolume = 8000.0, type = UserModel.TYPE_HOLDER, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "H3", capoVolume = 8000.0, type = UserModel.TYPE_HOLDER, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "H4", capoVolume = 10500.0, type = UserModel.TYPE_HOLDER, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "H5", capoVolume = 10500.0, type = UserModel.TYPE_HOLDER, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "H6", capoVolume = 10500.0, type = UserModel.TYPE_HOLDER, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "H7", capoVolume = 15000.0, type = UserModel.TYPE_HOLDER, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "H8", capoVolume = 15000.0, type = UserModel.TYPE_HOLDER, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "H9", capoVolume = 15000.0, type = UserModel.TYPE_HOLDER, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "H10", capoVolume = 20000.0, type = UserModel.TYPE_HOLDER, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "H11", capoVolume = 20000.0, type = UserModel.TYPE_HOLDER, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "H12", capoVolume = 20000.0, type = UserModel.TYPE_HOLDER, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "H13", capoVolume = 23500.0, type = UserModel.TYPE_HOLDER, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "H14", capoVolume = 23500.0, type = UserModel.TYPE_HOLDER, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "H15", capoVolume = 23500.0, type = UserModel.TYPE_HOLDER, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "H16", capoVolume = 29700.0, type = UserModel.TYPE_HOLDER, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "H17", capoVolume = 29700.0, type = UserModel.TYPE_HOLDER, discountValue = 15.0, isReport = false))
+                listUserDefault.add(UserModel(name = "H18", capoVolume = 29700.0, type = UserModel.TYPE_HOLDER, discountValue = 15.0, isReport = false))
+
+            }
 
             for (userModel in listUserDefault) {
                 var userAdded = UserInterface.addUser(realmInstance, userModel)
@@ -185,13 +212,13 @@ class OneFragment : Fragment(), View.OnClickListener {
         }
 
         when {
-            radioGroup.checkedRadioButtonId == rbRelayer.id -> typeUser = UserModel.UserModel.TYPE_RELAYER
-            radioGroup.checkedRadioButtonId == rbAffiliate.id -> typeUser = UserModel.UserModel.TYPE_AFFILIATE
-            radioGroup.checkedRadioButtonId == rbHolder.id -> typeUser = UserModel.UserModel.TYPE_HOLDER
+            radioGroup.checkedRadioButtonId == rbRelayer.id -> typeUser = UserModel.TYPE_RELAYER
+            radioGroup.checkedRadioButtonId == rbAffiliate.id -> typeUser = UserModel.TYPE_AFFILIATE
+            radioGroup.checkedRadioButtonId == rbHolder.id -> typeUser = UserModel.TYPE_HOLDER
         }
 
         var capoVolume = 0.0
-        if (typeUser == UserModel.UserModel.TYPE_RELAYER || typeUser == UserModel.UserModel.TYPE_HOLDER) {
+        if (typeUser == UserModel.TYPE_RELAYER || typeUser == UserModel.TYPE_HOLDER) {
             if (edAddCapo.text.toString() == "" || edAddCapo.text.toString().toDouble() <= 0) {
                 return Utilities.showToast(activity, "Vui lòng nhập số lượng CAPO")
             } else {
@@ -236,6 +263,8 @@ class OneFragment : Fragment(), View.OnClickListener {
     override fun onClick(v: View?) {
         if (v == btnAddRelayer) {
             addUser()
+        } else if (v == btnResetData) {
+            resetData()
         }
     }
 }

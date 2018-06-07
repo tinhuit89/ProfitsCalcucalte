@@ -15,12 +15,15 @@ import android.support.v4.app.FragmentPagerAdapter
 import android.support.v4.view.ViewPager
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.WindowManager
 import android.widget.TextView
 import io.realm.Realm
+import io.realm.kotlin.where
 import vct.profitscalculate.AppController
 import vct.profitscalculate.R
+import vct.profitscalculate.common.Constants
 import vct.profitscalculate.common.Utilities
 import vct.profitscalculate.controller.ItemAddUserController
 import vct.profitscalculate.fragment.OneFragment
@@ -39,7 +42,12 @@ class MainTabActivity internal constructor() : AppCompatActivity() {
 
     var listItemUserController: ArrayList<ItemAddUserController> = ArrayList()
     var listUsers: ArrayList<UserModel> = ArrayList()
-
+//
+//    fun getTotalCapoHold(): Double {
+//        var sum = AppController.realmInstance().where<UserModel>().equalTo("isReport", false).findAll().sum("capoVolume")
+//        Log.d(Constants.TAG, "Sum: $sum")
+//        return sum.toDouble()
+//    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -114,7 +122,7 @@ class MainTabActivity internal constructor() : AppCompatActivity() {
         tabLayout!!.getTabAt(2)!!.customView = tabThree
     }
 
-    private fun setupViewPager(viewPager: ViewPager) {
+    fun setupViewPager(viewPager: ViewPager) {
         val adapter = ViewPagerAdapter(supportFragmentManager)
         adapter.addFragment(OneFragment(), "Vốn")
         adapter.addFragment(TwoFragment(), "Doanh Thu")

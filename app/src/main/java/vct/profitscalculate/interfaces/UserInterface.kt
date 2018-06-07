@@ -4,12 +4,30 @@ import android.annotation.SuppressLint
 import android.util.Log
 import io.realm.Realm
 import io.realm.kotlin.where
+import vct.profitscalculate.AppController
 import vct.profitscalculate.common.Constants
 import vct.profitscalculate.models.UserModel
 
 class UserInterface {
     companion object {
         @SuppressLint("StaticFieldLeak")
+
+        fun getMaxId(realm: Realm): Long {
+            return try {
+                realm.beginTransaction()
+                var nextID = (realm.where(UserModel::class.java).max("id"))
+                nextID = if (nextID != null) {
+                    nextID as Long + 1L
+                } else {
+                    1L
+                }
+                realm.commitTransaction()
+                nextID
+            } catch (e: Exception) {
+                e.printStackTrace()
+                0
+            }
+        }
 
         fun addUser(realm: Realm, model: UserModel): UserModel? {
             return try {
@@ -62,8 +80,8 @@ class UserInterface {
         }
 
         fun getTotalHold(realm: Realm): Double {
-            var listUserFromdb = realm.where<vct.profitscalculate.models.UserModel>().findAll()
-            return listUserFromdb.sum("capoVolume").toDouble()
+            var sum = realm.where<UserModel>().equalTo("isReport", false).findAll().sum("capoVolume")
+            return sum.toDouble()
         }
     }
 }
