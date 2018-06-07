@@ -81,12 +81,30 @@ open class ReportModel(
             relayerParent.crossForAffiliate = (discountForAffiliate / 100) * revenueMonthlyOfRelayer * (100 - percentFromAffiliate) / 100
         }
 
-        //Calculate for Affiliates Child
-        listUser.filter { it.type == UserModel.TYPE_AFFILIATE }.forEach { affiliateChild ->
-            listUser.filter { it.type == UserModel.TYPE_RELAYER }.forEach { relayerParent ->
-                val discountForAffiliate = relayerParent.getDiscountForAffiliate()
-                val revenueMonthlyFromAffiliateChild = (percentFromAffiliate / 100) * (discountForAffiliate / 100 * relayerParent.revenueMonthly)
-                affiliateChild.crossForAffiliate += (affiliateChild.percentMonthly / 100) * revenueMonthlyFromAffiliateChild
+
+        if (Constants.TYPE_EXERCISE == 3) {
+            listUser.filter { it.type == UserModel.TYPE_AFFILIATE }.forEach { affiliateChild ->
+                val revenueFromAffChild = totalProfitOfMonth * (percentFromAffiliate / 100)
+                affiliateChild.revenueMonthly = (affiliateChild.percentMonthly / 100) * revenueFromAffChild
+                Utilities.showLog("Rev ${affiliateChild.name}: ${affiliateChild.revenueMonthly}", "REV")
+
+            }
+
+            val revAff = percentFromAffiliate / 100 * totalProfitOfMonth
+            listUser.filter { it.type == UserModel.TYPE_AFFILIATE }.forEach { affiliateChild ->
+                val revAffChild = affiliateChild.percentMonthly / 100 * revAff
+                affiliateChild.crossForAffiliate = revAffChild * affiliateChild.getDiscountForAffiliate() / 100
+
+                Utilities.showLog("Rev ${affiliateChild.name}: ${affiliateChild.crossForAffiliate}", "REV")
+            }
+
+        } else {
+            listUser.filter { it.type == UserModel.TYPE_AFFILIATE }.forEach { affiliateChild ->
+                listUser.filter { it.type == UserModel.TYPE_RELAYER }.forEach { relayerParent ->
+                    val discountForAffiliate = relayerParent.getDiscountForAffiliate()
+                    val revenueMonthlyFromAffiliateChild = (percentFromAffiliate / 100) * (discountForAffiliate / 100 * relayerParent.revenueMonthly)
+                    affiliateChild.crossForAffiliate += (affiliateChild.percentMonthly / 100) * revenueMonthlyFromAffiliateChild
+                }
             }
         }
 

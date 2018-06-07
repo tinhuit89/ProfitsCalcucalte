@@ -160,6 +160,7 @@ class TwoFragment : Fragment(), View.OnClickListener {
 
                 if (itemUserForMonth.userModel.type == UserModel.TYPE_AFFILIATE) {
                     itemUserForMonth.userModel.percentMonthly = itemUserForMonth.percentMonthly
+                    Log.d(Constants.TAG, "Percent: ${itemUserForMonth.userModel.percentMonthly}")
                 }
 
                 if (itemUserForMonth.cbViolate.isChecked) {

@@ -82,7 +82,7 @@ class MonthAdapter(private val activity: Activity, private val callback: DataCal
             holder.tvReport.visibility = View.VISIBLE
             holder.tvReport.text = item.textReport
         } else {
-            holder.tvReport.visibility = View.GONE
+//            holder.tvReport.visibility = View.GONE
         }
 
         holder.btnDel.setOnClickListener {

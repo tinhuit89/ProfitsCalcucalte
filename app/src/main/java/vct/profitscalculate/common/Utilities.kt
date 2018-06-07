@@ -134,4 +134,10 @@ object Utilities {
             e.printStackTrace()
         }
     }
+
+    fun showLog(data: Any, mess: String) {
+        Log.d(Constants.TAG, "\n==============$mess==============\n")
+        Log.d(Constants.TAG, "$data")
+        Log.d(Constants.TAG, "\n====================================\n")
+    }
 }

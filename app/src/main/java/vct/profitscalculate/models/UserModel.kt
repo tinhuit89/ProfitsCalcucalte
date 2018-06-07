@@ -104,13 +104,13 @@ open class UserModel(
     }
 
 
-    fun getDiscountForAffiliate(): Double {
-        if (type == UserModel.TYPE_RELAYER) {
-            return 15.0
-        } else {
-            return 0.0
-        }
-    }
+//    fun getDiscountForAffiliate(): Double {
+//        if (type == UserModel.TYPE_RELAYER) {
+//            return 15.0
+//        } else {
+//            return 0.0
+//        }
+//    }
 
     fun getDiscountForHolder(): Double {
         return 15.0
@@ -125,7 +125,7 @@ open class UserModel(
     }
 
     //bài tập 3
-    fun getDiscountForAff(typeExercise: Int = Constants.TYPE_EXERCISE): Double {
+    fun getDiscountForAffiliate(typeExercise: Int = Constants.TYPE_EXERCISE): Double {
         if (typeExercise == 1) {
             return 15.0
         } else if (typeExercise == 2) {
@@ -136,9 +136,11 @@ open class UserModel(
             }
         } else if (typeExercise == 3) {
             return when (type) {
-                UserModel.TYPE_AFFILIATE -> return if (revenueMonthly <= 5000) {
+                UserModel.TYPE_AFFILIATE -> return if (revenueMonthly <= 0) {
+                    0.0
+                } else if (revenueMonthly > 0 && revenueMonthly <= 5000) {
                     5.0
-                } else if (revenueMonthly > 50000 && revenueMonthly <= 10000) {
+                } else if (revenueMonthly > 5000 && revenueMonthly <= 10000) {
                     10.0
                 } else {
                     15.0
