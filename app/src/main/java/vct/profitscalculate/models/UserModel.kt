@@ -29,7 +29,7 @@ open class UserModel(
 
         open var isViolate: Boolean = false,
 
-        open var blockAtMonthId: Long = -1L,
+        open var remainingBlockMonth: Int = 0,
 
         open var finesPaided: Double = 0.0,
 
@@ -61,7 +61,7 @@ open class UserModel(
             finalCrossReceived: Double = this.finalCrossReceived,
             profitOfKeepFine: Double = this.profitOfKeepFine,
             isViolate: Boolean = this.isViolate,
-            blockAtMonthId: Long = this.blockAtMonthId,
+            remainingBlockMonth: Int = this.remainingBlockMonth,
             finesPaided: Double = this.finesPaided,
             finesMustPaid: Double = this.finesMustPaid,
             exerciseId: Int = this.exerciseId,
@@ -72,7 +72,7 @@ open class UserModel(
     ) = UserModel(id, name, capoVolume, type, discountValue,
             revenueMonthly, percentMonthly, crossForRelayer,
             crossForFlatform, crossForAffiliate, crossForHolder, finalCrossReceived,
-            profitOfKeepFine, isViolate, blockAtMonthId, finesPaided, finesMustPaid,
+            profitOfKeepFine, isViolate, remainingBlockMonth, finesPaided, finesMustPaid,
             exerciseId, crossForHolderQuater, finalCrossQuater, isReport)
 
 
@@ -102,15 +102,6 @@ open class UserModel(
             return 0.0
         }
     }
-
-
-//    fun getDiscountForAffiliate(): Double {
-//        if (type == UserModel.TYPE_RELAYER) {
-//            return 15.0
-//        } else {
-//            return 0.0
-//        }
-//    }
 
     fun getDiscountForHolder(): Double {
         return 15.0

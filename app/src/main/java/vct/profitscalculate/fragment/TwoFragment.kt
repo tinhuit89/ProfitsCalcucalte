@@ -1,12 +1,16 @@
 package vct.profitscalculate.fragment
 
 import android.os.Bundle
+import android.os.Handler
 import android.support.v4.app.Fragment
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import io.realm.Sort
 import vct.profitscalculate.R
 import vct.profitscalculate.activity.MainTabActivity
 import vct.profitscalculate.common.Constants
@@ -81,6 +85,22 @@ class TwoFragment : Fragment(), View.OnClickListener {
         btnAddMonth.setOnClickListener(this)
 
         setDataMonth()
+
+        edMonthName.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(p0: Editable?) {
+
+            }
+
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+
+            }
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                if (edMonthName.text.toString() != "") {
+                    setDataDefault(edMonthName.text.toString().toInt())
+                }
+            }
+        })
     }
 
     private fun setDataMonth() {
@@ -165,9 +185,25 @@ class TwoFragment : Fragment(), View.OnClickListener {
 
                 if (itemUserForMonth.cbViolate.isChecked) {
                     itemUserForMonth.userModel.isViolate = true
-                    itemUserForMonth.userModel.blockAtMonthId = monthProfitModel.id
+                    itemUserForMonth.userModel.remainingBlockMonth += ReportModel.blockMonthCount
                     itemUserForMonth.userModel.finesMustPaid += ReportModel.finePaidCount
+                } else {
+                    var listMonth = AppController.realmInstance().where(ReportModel::class.java).equalTo("type", ReportModel.TYPE_MONTH).findAll().sort("id", Sort.DESCENDING)
+                    var lastMonth: ReportModel? = null
+                    if (listMonth.size >= 1) {
+                        lastMonth = listMonth[0]
+                    }
+
+                    if (lastMonth != null) {
+                        lastMonth.listUser.filter { it.name == itemUserForMonth.userModel.name }.map {
+                            itemUserForMonth.userModel.isViolate = it.isViolate
+                            itemUserForMonth.userModel.remainingBlockMonth = it.remainingBlockMonth
+                            itemUserForMonth.userModel.finesPaided = it.finesPaided
+                            itemUserForMonth.userModel.finesMustPaid = it.finesMustPaid
+                        }
+                    }
                 }
+
                 var userCopy = itemUserForMonth.userModel.copy()
                 userCopy.id = userCopy.id + (index + 1) + maxIdUserDb
                 userCopy.isReport = true
@@ -193,6 +229,44 @@ class TwoFragment : Fragment(), View.OnClickListener {
             if (monthAdded != null) {
                 Utilities.showToast(activity, "Tạo doanh thu thành công")
             }
+        }
+    }
+
+    var listOne = listOf(80000, 90000, 40000, 40000, 5, 0, 30, 40, 25)
+    var listTwo = listOf(260000, 200000, 300000, 90000, 0, 10, 55, 5, 30)
+    var listThree = listOf(800000, 520000, 580000, 900000, 10, 15, 35, 15, 25)
+    private fun setDataDefault(month: Int) {
+        if (month == 1) {
+            for ((index, item) in listOne.withIndex()) {
+                listUserForMonth[index].edVol.setText(item.toString())
+
+                listUserForMonth[index].cbViolate.isChecked = false
+
+                if (listUserForMonth[index].userModel.name == "A4") {
+                    listUserForMonth[index].cbViolate.isChecked = true
+                }
+
+            }
+            edPercentFromAffiliates.setText("10")
+        } else if (month == 2) {
+            for ((index, item) in listTwo.withIndex()) {
+                listUserForMonth[index].edVol.setText(item.toString())
+
+                listUserForMonth[index].cbViolate.isChecked = false
+
+                if (listUserForMonth[index].userModel.name == "dex.nami.trade") {
+                    listUserForMonth[index].cbViolate.isChecked = true
+                }
+
+            }
+            edPercentFromAffiliates.setText("15")
+        } else if (month == 3) {
+            for ((index, item) in listThree.withIndex()) {
+                listUserForMonth[index].edVol.setText(item.toString())
+                listUserForMonth[index].cbViolate.isChecked = false
+
+            }
+            edPercentFromAffiliates.setText("25")
         }
     }
 

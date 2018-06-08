@@ -90,13 +90,21 @@ open class ReportModel(
 
             }
 
+            var totalCrossForAffChild = 0.0
             val revAff = percentFromAffiliate / 100 * totalProfitOfMonth
             listUser.filter { it.type == UserModel.TYPE_AFFILIATE }.forEach { affiliateChild ->
                 val revAffChild = affiliateChild.percentMonthly / 100 * revAff
-                affiliateChild.crossForAffiliate = revAffChild * affiliateChild.getDiscountForAffiliate() / 100
 
+                affiliateChild.crossForAffiliate = revAffChild * affiliateChild.getDiscountForAffiliate() / 100
+                totalCrossForAffChild += affiliateChild.crossForAffiliate
                 Utilities.showLog("Rev ${affiliateChild.name}: ${affiliateChild.crossForAffiliate}", "REV")
             }
+
+            var totalActuallyRecieveAffChild = (getDiscountForRelayerAffiliate() / 100 * totalProfitOfMonth) * (percentFromAffiliate / 100)
+
+            var surplusCrossOfAFF = totalActuallyRecieveAffChild - totalCrossForAffChild
+            finalCrossFlatformReceived += surplusCrossOfAFF
+            Utilities.showLog("Surplus: $surplusCrossOfAFF", "Số dư")
 
         } else {
             listUser.filter { it.type == UserModel.TYPE_AFFILIATE }.forEach { affiliateChild ->
@@ -129,19 +137,38 @@ open class ReportModel(
         }
 
         for (user in listUser) {
+//
+//            var listMonth = AppController.realmInstance().where(ReportModel::class.java).equalTo("type", ReportModel.TYPE_MONTH).findAll().sort("id", Sort.DESCENDING)
+//            var lastMonth: ReportModel? = null
+//            var lastUser: UserModel? = null
+//            if (listMonth.size >= 1) {
+//                lastMonth = listMonth[0]
+//            }
+//
+//            if (lastMonth != null) {
+//                lastMonth.listUser.filter { it.name == user.name }.map {
+//                    lastUser.isViolate = it.isViolate
+//                    lastUser.blockAtMonthId = it.blockAtMonthId
+//                    lastUser.isViolate = it.isViolate
+//                }
+//            }
+
             if (user.isViolate) {
                 if (user.type == UserModel.TYPE_AFFILIATE) {
-                    if (this.id - user.blockAtMonthId == 2L) {
-                        user.isViolate = false
-                        user.blockAtMonthId = -1
-                    } else {
-                        user.blockAtMonthId = this.id
+                    if (user.remainingBlockMonth > 0) {
                         finalCrossFlatformReceived += user.finalCrossReceived
                         user.finalCrossReceived = 0.0
+                        user.remainingBlockMonth -= 1
+
+                        if (user.remainingBlockMonth == 0) {
+                            user.isViolate = false
+                        }
                     }
                 } else if (user.type == UserModel.TYPE_RELAYER) {
+
                     val remainingFines = user.finesMustPaid - user.finesPaided
 
+                    Utilities.showLog("Nợ còn lại của ${user.name} $remainingFines", "Nợ còn lại")
                     var isUnFine = false
                     if (remainingFines > 0 && user.finalCrossReceived < remainingFines) {
                         keepFineProfit += user.finalCrossReceived
@@ -160,7 +187,6 @@ open class ReportModel(
 
                     if (isUnFine) {
                         user.isViolate = false
-                        user.blockAtMonthId = -1
                         user.finesPaided = 0.0
                         user.finesMustPaid = 0.0
                     }
@@ -245,8 +271,14 @@ open class ReportModel(
 
     companion object {
         const val finePaidCount: Double = 80000.0
+        const val blockMonthCount: Int = 2
         const val TYPE_MONTH: Int = 1
         const val TYPE_QUATER: Int = 2
+
+
+        fun getDiscountForRelayerAffiliate(): Double {
+            return 15.0
+        }
 
     }
 
